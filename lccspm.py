@@ -6,7 +6,6 @@ Created on Thu Oct  8 19:16:41 2020
 @author: ADEYEMO, Victor Elijah.
 """
 
-import csv
 import pandas as pd
 
 
@@ -23,22 +22,32 @@ class Mining:
         self.sequenceDB= self.data.iloc[0:,1].tolist()
         self.sdblength = len(self.sequenceDB)
         
-        self.maxlength = 0
+        self.sdbmaxlength = 0
         for sequence in self.sequenceDB:
             self._maxl = len(sequence)
-            if self._maxl > self.maxlength:
-                self.maxlength = self._maxl
+            if self._maxl > self.sdbmaxlength:
+                self.sdbmaxlength = self._maxl
         
-        
+        self.summation = 0
+        for sequence in self.sequenceDB:
+            self.length = len(sequence)
+            self.summation+=self.length    
+            
+        self.sdbavglength = round(self.summation/self.sdblength)
+            
+    def get_SDBAvglength(self):
+        return self.sdbavglength
 
-    def get_maxLength(self):
-        return self.maxlength
+    def get_SDBLength(self):
+        return self.summation
+        
+    def get_SDBmaxLength(self):
+        return self.sdbmaxlength
     
     def get_SDB(self):
         return self.sequenceDB
     
-    def get_SDBlength(self):
-        #self.sdblength = len(self.sequenceDB)
+    def get_SDBsize(self):
         return self.sdblength
     
     def get_name(self):
@@ -84,31 +93,79 @@ class Mining:
         return self.GeneratedCandidates
     
         
-    def setl_mine(self, length):
+    def setl_mine(self, length, support):
         self.length = length
+        self.support = support
         
-        if self.length == self.maxlength:
+        self.Abs_score = ((self.support/100)* self.sdblength)
+        self.lastSeq = round((self.sdblength - self.Abs_score) + 1)
+        
+        self.SDB = self.sequenceDB[:self.lastSeq]
+        self.SDBlen = len(self.SDB)
+                
+        if self.length == self.sdbmaxlength:
             self.length = self.length -2
         
-        self.GeneratedCandidates = []
+        self.GeneratedCandidates = {}
         
         for x in range(self.length):
-            for i in range(self.sdblength-1):
+            for i in range(self.SDBlen):
                 start = 0
                 end = x+1
                 
                 while(end <= len(self.sequenceDB[i])):
-                    self.GeneratedCandidates.append(self.sequenceDB[i][start:end])
+                    self.GeneratedCandidates.update({self.SDB[i][start:end]:None})
                     start+=1
                     end+=1
         return self.GeneratedCandidates
 
+    def size(self, file):
+        self.siz = len(file)
+        
+        return self.siz
+    
+    def avglength(self, file):
+        
+        self.siz = len(file)
+        
+        if(self.siz == 0):
+            self.average = self.siz
+        
+        else:
+            self.summedlength = 0
+            for sequence in file.keys():
+                self.length = len(sequence)
+                self.summedlength+=self.length
+            
+            self.average = round(self.summedlength/self.siz)
+        
+        return self.average
+    
+    def totallength(self, file):
+        self.data = file
+        self.summedlength = 0
+        for sequence in self.data:
+            self.length = len(sequence)
+            self.summedlength+=self.length  
+        
+        return self.summedlength
+
+    def maxlength(self, file):
+        self.data = file.keys()
+        self.maxleng = 0
+        for sequence in self.data:
+            self._fmaxl = len(sequence)
+            if self._fmaxl > self.maxleng:
+                self.maxleng = self._fmaxl
+        
+        return self.maxleng
 
 
 class Pruning:
     def __init__(self, name, object):
         self.name = name
         self.sequenceDB = object.sequenceDB
+        self.sdblength = object.sdblength
     
     def get_name(self):
         return self.name
@@ -121,13 +178,17 @@ class Pruning:
         self.support = support
 
         self.SupportList = {}
+        self.Abs_score = ((self.support/100)* self.sdblength)
         
-        for sub in self.mined:
-            score = len([i for i in self.sequenceDB if sub in i])
-            if score >= self.support:
-                self.SupportList.update({sub:score})
+        for sub in self.mined.keys():
+            
+            self.score = len([i for i in self.sequenceDB if sub in i])
+            
+            if self.score >= self.Abs_score:
+                self.SupportList.update({sub:self.score})
         
         return self.SupportList
+
     
     def prune(self, mined):
         self.mined = mined
@@ -148,8 +209,6 @@ class Pruning:
         self.support = support
 
 
-
-
 class Closed:
     def __init__(self, name):
         self.name = name
@@ -166,8 +225,8 @@ class Closed:
                     non = (_subsequence, support)
                     self.nonclosed.add(non)
         
-        self.closedcontiguous = dict(self.pruned.items() - self.nonclosed)
-        return self.closedcontiguous, self.nonclosed
+        closedcontiguous = dict(self.pruned.items() - self.nonclosed)
+        return closedcontiguous
     
     def csv(self, file, filename):
         self.filename = filename
@@ -176,8 +235,3 @@ class Closed:
         self.Dfile = pd.DataFrame(list(self.file.items()), columns = ['Subsequences','Support'])
         self.Dfile = self.Dfile.sort_values('Support', ascending=False)
         self.Dfile.to_csv(filename, index=False)
-
-
-
-
-
