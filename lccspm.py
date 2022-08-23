@@ -1,14 +1,13 @@
 """
 Lccspm
 
-Created on Thu Oct  8 19:16:41 2020
+"""
+Created on Mon Aug 22 13:23:14 2022
 
-@author: ADEYEMO, Victor Elijah.
+@author: adeyem01
 """
 
 import pandas as pd
-
-
 
 class Mining:
     def __init__(self, name):
@@ -82,7 +81,7 @@ class Mining:
         self.length = length
         self.Rel_support = rel_support
         
-        self.Abs_score = ((self.Rel_support/100)* self.sdblength)
+        self.Abs_score = round(((self.Rel_support/100)* self.sdblength))
         #self.lastSeq = round((self.sdblength - self.Abs_score) + 1)
         
         #self.SDB = self.sequenceDB[:self.lastSeq]
@@ -99,7 +98,7 @@ class Mining:
                 end = x+1
                 
                 while(end <= len(self.sequenceDB[i])):
-                    self.GeneratedCandidates.update({self.SDB[i][start:end]:None})
+                    self.GeneratedCandidates.update({self.sequenceDB[i][start:end]:None})
                     start+=1
                     end+=1
         return self.GeneratedCandidates
