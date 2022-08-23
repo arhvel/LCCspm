@@ -76,32 +76,17 @@ class Mining:
                 end+=1
         
         return list(self.GeneratedCandidates.keys())
-    
-    def mine(self):
+     
         
-        self.GeneratedCandidates = {}
-        
-        for x in range(self.length):
-            for i in range(self.sdblength-1):
-                start = 0
-                end = x+1
-                
-                while(end <= len(self.sequenceDB[i])):
-                    self.GeneratedCandidates.update({self.sequenceDB[i][start:end]:None})
-                    start+=1
-                    end+=1
-        return self.GeneratedCandidates
-    
-        
-    def setl_mine(self, length, support):
+    def setl_mine(self, length, rel_support):
         self.length = length
-        self.support = support
+        self.Rel_support = rel_support
         
-        self.Abs_score = ((self.support/100)* self.sdblength)
-        self.lastSeq = round((self.sdblength - self.Abs_score) + 1)
+        self.Abs_score = ((self.Rel_support/100)* self.sdblength)
+        #self.lastSeq = round((self.sdblength - self.Abs_score) + 1)
         
-        self.SDB = self.sequenceDB[:self.lastSeq]
-        self.SDBlen = len(self.SDB)
+        #self.SDB = self.sequenceDB[:self.lastSeq]
+        #self.SDBlen = len(self.SDB)
                 
         if self.length == self.sdbmaxlength:
             self.length = self.length -2
@@ -109,7 +94,7 @@ class Mining:
         self.GeneratedCandidates = {}
         
         for x in range(self.length):
-            for i in range(self.SDBlen):
+            for i in range(self.Abs_score):
                 start = 0
                 end = x+1
                 
@@ -173,12 +158,12 @@ class Pruning:
     def set_name(self, name):
         self.name = name
         
-    def setsupportpruning(self, mined, support):
+    def setsupportpruning(self, mined, rel_support):
         self.mined = mined
-        self.support = support
+        self.Rel_support = rel_support
 
         self.SupportList = {}
-        self.Abs_score = ((self.support/100)* self.sdblength)
+        self.Abs_score = ((self.Rel_support/100)* self.sdblength)
         
         for sub in self.mined.keys():
             
@@ -190,17 +175,17 @@ class Pruning:
         return self.SupportList
 
     
-    def prune(self, mined):
-        self.mined = mined
+    #def prune(self, mined):
+        #self.mined = mined
         
-        self.SupportList = {}
+        #self.SupportList = {}
 
-        for sub in self.mined.keys():
-            score = len([i for i in self.sequenceDB if sub in i])
-            if score >= self.support:
-                self.SupportList.update({sub:score})
+        #for sub in self.mined.keys():
+            #score = len([i for i in self.sequenceDB if sub in i])
+            #if score >= self.support:
+                #self.SupportList.update({sub:score})
 
-        return self.SupportList
+        #return self.SupportList
     
     def get_support(self):
         return self.support
